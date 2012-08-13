@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>MinnPost</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
+<script type='text/javascript' src='//s7.addthis.com/js/250/addthis_widget.js#async=1'></script>
+<link rel="shortcut icon" href="http://www.minnpost.com//sites/default/themes/siteskin/favicon.ico" type="image/x-icon" />
+<meta name="keywords" content="Mark Dayton,Minnesota DFL,Minnesota GOP,Minnesota Legislature,Vikings Stadium,Voter ID Amendment" />
+<meta name="description" content="  " />
+<meta property="og:title" content="The 2012 Legislative session: What did they pass?"/>
+<meta property="og:site_name" content="MinnPost"/>
+<meta property="og:description" content="Explore bills by category, investigate which bills Gov. Dayton vetoed, and search by your legislators.
+"/>
+<meta property="og:image" content="http://www.minnpost.com/sites/default/files/images/thumbnails/fullpagearticles/BillExplorerGraphic3.png"/>
+<link rel="apple-touch-icon" href="http://www.minnpost.com//sites/default/themes/siteskin/inc/images/apple-touch-icon.png" />
+<meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+  <link type="text/css" rel="stylesheet" media="all" href="http://www.minnpost.com/sites/default/files/css/css_117735d70d328fde73465d234e0d6145.css" />
+<link type="text/css" rel="stylesheet" media="screen" href="http://www.minnpost.com/sites/default/files/css/css_d59702640f3a018434b089a23d5f9360.css" />
+<link type="text/css" rel="stylesheet" media="print" href="http://www.minnpost.com/sites/default/files/css/css_9893031b33c83f7dac84142a4217929e.css" />
+  <!--[if IE]>
+      <link rel="stylesheet" href="http://www.minnpost.com/sites/default/themes/derma/inc/css/ie.css?b" type="text/css">
+  <![endif]-->
+    <script type="text/javascript" src="http://www.minnpost.com/sites/default/files/js/js_956f6bec814fd4eca43cced7fa024bdd.js"></script>
+<script type="text/javascript" src="http://www.minnpost.com/sites/all/libraries/tinymce/jscripts/tiny_mce/tiny_mce.js?t"></script>
+</head>
+<body class="not-front logged-in page-node node-type-article one-sidebar sidebar-right admin-nw admin-vertical admin-df  section-data section-data-id-2012 section-data-id-2012-id-05 section-data-id-2012-id-05-how-we-built-legislative-bill-explorer one-sidebar sidebar-right">
+<div class="outside-embeddable-container">
+
+  <!-- START: Embeddable -->
+  <div class="node-body fieldlayout node-field-body">
+    <style type="text/css">
+      #minnpost-mn-legislature-balance-application {
+        max-width: 960px;
+        margin: 0 auto;
+        color: #555556;
+        font-family: Helvetica,Arial,Geneva,sans-serif;
+      }
+      .clear {
+        clear: both;
+      }
+      
+      .js-dependent,
+      .hide {
+        display: none;
+      }
+      
+      .footnote {
+        font-size: .75em;
+        font-style: italic;
+        color: #414141;
+        margin-top: 1em;
+      }
+    </style>
+    
+    <div id="minnpost-mn-legislature-balance-application">
+      <div id=""></div>
+      
+      <p class="footnote"></p>
+    </div>
+    
+    <!-- Templates to be used in client side processing. -->
+    <script id="template-" type="text/template">
+      <div class=""></div>
+      </div>
+    </script>
+  
+    <!-- jQuery if it is not there and jQueryCustom for Backbone --><!-- jQuery -->
+    <script type="text/javascript">
+      window.jQuery || document.write('<script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/jquery-1.7.2/jquery-1.7.2.min.js"><\/script>')
+    </script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/underscore-1.3.3/underscore-min.js"></script>
+    <script type="text/javascript" src="https://s3.amazonaws.com/data.minnpost/js/raphael-2.1.0/raphael-min.js"></script>
+    
+    <script type="text/javascript">
+      
+      (function($, window, undefined) {
+        $(document).ready(function() {
+          // Application container
+          var KeyvotesApp = (function() {
+            function KeyvotesApp() {
+              this.appName = 'mn-legislature-balance';
+              this.dataDir = './data/';
+              this.imageDir = './images/';
+              this.partyColors = {
+                'D': 'rgb(0, 113, 172)',
+                'R': 'rgb(161, 0, 15)'
+              };
+              
+              this.processHost();
+            };
+            
+            KeyvotesApp.prototype.launch = function() {
+              // Do some binding
+              _.bindAll(this);
+            
+            };
+            
+            KeyvotesApp.prototype.processHost = function() {
+              if (location.host.indexOf('localhost') === -1) {
+                this.dataDir = 'https://s3.amazonaws.com/data.minnpost/' +
+                  'projects/minnpost-' + this.appName + '/data/';
+                this.imageDir = 'https://s3.amazonaws.com/data.minnpost/' +
+                  'projects/minnpost-' + this.appName + '/images/';
+              }
+              
+              return this;
+            };
+            
+            return KeyvotesApp;
+          })();
+          
+          // Make app instance
+          keyvotesApp = new KeyvotesApp();
+          
+        });
+      })(jQuery, window);
+      
+    </script>
+  </div>
+  <!-- END: Embeddable -->
+
+</div>
+</body>
+</html>
