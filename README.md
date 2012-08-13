@@ -1,4 +1,3 @@
-minnpost-mn-legislature-balance
-===============================
+# MN Legislature Political Balance
 
-Application to interact with the political balance of the MN Legislature.
+Application to visualize with the political balance of the MN Legislature.
