@@ -65,7 +65,7 @@
       <h3>Upcoming Senate</h3>
       <div id="senate-upcoming-canvas"></div>
       
-      <h3>Upcoming Senate</h3>
+      <h3>Upcoming House</h3>
       <div id="house-upcoming-canvas"></div>
       
       <p class="footnote"></p>
@@ -112,23 +112,34 @@
             KeyvotesApp.prototype.launch = function() {
               // Do some binding
               _.bindAll(this);
-              this.buildSenateCanvas();
+              this.buildCurrentCanvas('house');
+              this.buildCurrentCanvas('senate');
             };
             
-            KeyvotesApp.prototype.buildSenateCanvas = function() {
+            KeyvotesApp.prototype.buildCurrentCanvas = function(type) {
               var thisApp = this;
             
               this.cW = $(this.containerSelector).width();
               this.cH = (this.cW / 4);
               
+              // Determine chamber
+              var canvasID = 'house-current-canvas';
+              var dataSet = 'houseData';
+              var canvasSet = 'houseCP';
+              if (type == 'senate') {
+                canvasID = 'senate-current-canvas';
+                dataSet = 'senateData';
+                canvasSet = 'senateCP';
+              }
+              
               // Create Raphael paper Senate (current)
-              this.scP = Raphael('senate-current-canvas', this.cW, this.cH);
-              this.scP.objs = {};
+              this[canvasSet] = Raphael(canvasID, this.cW, this.cH);
+              this[canvasSet].objs = {};
               
               // Determine grid dimensions
-              var sTotal = this.senateData.length;
+              var t = this[dataSet].length;
               var c = 15;
-              var r = Math.ceil(sTotal / c);
+              var r = Math.ceil(t / c);
               var cellW = this.cW / c;
               var cellH = this.cH / r;
               var rectAttr = {
@@ -136,18 +147,23 @@
                 'fill-opacity': 1
               };
               
-              _.each(this.senateData, function(rep, i, sData) {
+              // Sort by party (reverse), then display
+              this[dataSet] = _.sortBy(this[dataSet], function(rep) {
+                return (rep.party === 'Democratic-Farmer-Labor') ? 'z' : rep.party;
+              }); 
+              _.each(this[dataSet], function(rep, i, origObj) {
                 // Determine where on grid
                 var x = (i % c);
                 var y = Math.floor(i / c);
                 
-                thisApp.scP.objs[i] = thisApp.scP.rect(x * cellW, y * cellH, (cellW * 0.8), (cellH * 0.8), 3);
-                thisApp.scP.objs[i].attr(rectAttr);
+                thisApp[canvasSet].objs[i] = thisApp[canvasSet].rect(
+                  x * cellW, y * cellH, (cellW * 0.8), (cellH * 0.8), 2);
+                thisApp[canvasSet].objs[i].attr(rectAttr);
                 if (rep.party === 'Democratic-Farmer-Labor') {
-                  thisApp.scP.objs[i].attr('fill', thisApp.partyColors['D']);
+                  thisApp[canvasSet].objs[i].attr('fill', thisApp.partyColors['D']);
                 }
                 else {
-                  thisApp.scP.objs[i].attr('fill', thisApp.partyColors['R']);
+                  thisApp[canvasSet].objs[i].attr('fill', thisApp.partyColors['R']);
                 }
               });
             };
