@@ -56,7 +56,17 @@
     </style>
     
     <div id="minnpost-mn-legislature-balance-application">
-      <div id=""></div>
+      <h3>Current Senate</h3>
+      <div id="senate-current-canvas"></div>
+      
+      <h3>Current House</h3>
+      <div id="house-current-canvas"></div>
+      
+      <h3>Upcoming Senate</h3>
+      <div id="senate-upcoming-canvas"></div>
+      
+      <h3>Upcoming Senate</h3>
+      <div id="house-upcoming-canvas"></div>
       
       <p class="footnote"></p>
     </div>
@@ -82,12 +92,19 @@
           var KeyvotesApp = (function() {
             function KeyvotesApp() {
               this.appName = 'mn-legislature-balance';
+              this.containerSelector = '#minnpost-mn-legislature-balance-application';
               this.dataDir = './data/';
               this.imageDir = './images/';
               this.partyColors = {
                 'D': 'rgb(0, 113, 172)',
                 'R': 'rgb(161, 0, 15)'
               };
+              // Please do not abuse this key
+              this.openstatesAPIKey = '49c5c72c157d4b37892ddb52c63d06be';
+              this.openstatesSenateURL = 'http://openstates.org/api/v1/legislators/?' +
+                'state=mn&active=true&chamber=upper&apikey=' + this.openstatesAPIKey;
+              this.openstatesHouseURL = 'http://openstates.org/api/v1/legislators/?' +
+                'state=mn&active=true&chamber=lower&apikey=' + this.openstatesAPIKey;
               
               this.processHost();
             };
@@ -95,7 +112,44 @@
             KeyvotesApp.prototype.launch = function() {
               // Do some binding
               _.bindAll(this);
+              this.buildSenateCanvas();
+            };
             
+            KeyvotesApp.prototype.buildSenateCanvas = function() {
+              var thisApp = this;
+            
+              this.cW = $(this.containerSelector).width();
+              this.cH = (this.cW / 4);
+              
+              // Create Raphael paper Senate (current)
+              this.scP = Raphael('senate-current-canvas', this.cW, this.cH);
+              this.scP.objs = {};
+              
+              // Determine grid dimensions
+              var sTotal = this.senateData.length;
+              var c = 15;
+              var r = Math.ceil(sTotal / c);
+              var cellW = this.cW / c;
+              var cellH = this.cH / r;
+              var rectAttr = {
+                'stroke-width': 0,
+                'fill-opacity': 1
+              };
+              
+              _.each(this.senateData, function(rep, i, sData) {
+                // Determine where on grid
+                var x = (i % c);
+                var y = Math.floor(i / c);
+                
+                thisApp.scP.objs[i] = thisApp.scP.rect(x * cellW, y * cellH, (cellW * 0.8), (cellH * 0.8), 3);
+                thisApp.scP.objs[i].attr(rectAttr);
+                if (rep.party === 'Democratic-Farmer-Labor') {
+                  thisApp.scP.objs[i].attr('fill', thisApp.partyColors['D']);
+                }
+                else {
+                  thisApp.scP.objs[i].attr('fill', thisApp.partyColors['R']);
+                }
+              });
             };
             
             KeyvotesApp.prototype.processHost = function() {
@@ -114,6 +168,15 @@
           
           // Make app instance
           keyvotesApp = new KeyvotesApp();
+          
+          // Get open states data
+          $.getJSON(keyvotesApp.openstatesSenateURL + '&callback=?', function(legs) {
+            keyvotesApp.senateData = legs;
+            $.getJSON(keyvotesApp.openstatesHouseURL + '&callback=?', function(legs) {
+              keyvotesApp.houseData = legs;
+              keyvotesApp.launch();
+            });
+          });
           
         });
       })(jQuery, window);
