@@ -56,17 +56,13 @@
     </style>
     
     <div id="minnpost-mn-legislature-balance-application">
-      <h3>Current Senate</h3>
-      <div id="senate-current-canvas"></div>
+      <h3>Senate</h3>
+      <a href="#" class="senate-current">Current</a> | <a href="#" class="senate-potential">Potential</a>
+      <div id="senate-canvas"></div>
       
-      <h3>Current House</h3>
-      <div id="house-current-canvas"></div>
-      
-      <h3>Upcoming Senate</h3>
-      <div id="senate-upcoming-canvas"></div>
-      
-      <h3>Upcoming House</h3>
-      <div id="house-upcoming-canvas"></div>
+      <h3>House</h3>
+      <a href="#" class="house-current">Current</a> | <a href="#" class="house-potential">Potential</a>
+      <div id="house-canvas"></div>
       
       <p class="footnote"></p>
     </div>
@@ -89,8 +85,8 @@
       (function($, window, undefined) {
         $(document).ready(function() {
           // Application container
-          var KeyvotesApp = (function() {
-            function KeyvotesApp() {
+          var BalanceApp = (function() {
+            function BalanceApp() {
               this.appName = 'mn-legislature-balance';
               this.containerSelector = '#minnpost-mn-legislature-balance-application';
               this.dataDir = './data/';
@@ -105,36 +101,56 @@
                 'state=mn&active=true&chamber=upper&apikey=' + this.openstatesAPIKey;
               this.openstatesHouseURL = 'http://openstates.org/api/v1/legislators/?' +
                 'state=mn&active=true&chamber=lower&apikey=' + this.openstatesAPIKey;
+              this.dRectAttr = {
+                'stroke-width': 0,
+                'fill-opacity': 1,
+                'fill': '#FFFFFF'
+              };
               
               this.processHost();
             };
             
-            KeyvotesApp.prototype.launch = function() {
-              // Do some binding
+            BalanceApp.prototype.launch = function() {
+              var thisApp = this;
               _.bindAll(this);
-              this.buildCurrentCanvas('house');
-              this.buildCurrentCanvas('senate');
+              
+              this.buildGrid('house');
+              this.buildGrid('senate');
+              
+              this.showCurrent('house');
+              this.showCurrent('senate');
+              
+              $('.senate-potential').click(function(e) {
+                e.preventDefault();
+                thisApp.showPotential('senate');
+              });
+              $('.house-potential').click(function(e) {
+                e.preventDefault();
+                thisApp.showPotential('house');
+              });
+              $('.senate-current').click(function(e) {
+                e.preventDefault();
+                thisApp.showCurrent('senate');
+              });
+              $('.house-current').click(function(e) {
+                e.preventDefault();
+                thisApp.showCurrent('house');
+              });
             };
             
-            KeyvotesApp.prototype.buildCurrentCanvas = function(type) {
+            BalanceApp.prototype.buildGrid = function(type) {
               var thisApp = this;
             
+              this.paper = this.paper || {};
               this.cW = $(this.containerSelector).width();
               this.cH = (this.cW / 4);
               
               // Determine chamber
-              var canvasID = 'house-current-canvas';
-              var dataSet = 'houseData';
-              var canvasSet = 'houseCP';
-              if (type == 'senate') {
-                canvasID = 'senate-current-canvas';
-                dataSet = 'senateData';
-                canvasSet = 'senateCP';
-              }
+              var dataSet = (type == 'senate') ? 'senateData' : 'houseData';
               
               // Create Raphael paper Senate (current)
-              this[canvasSet] = Raphael(canvasID, this.cW, this.cH);
-              this[canvasSet].objs = {};
+              this.paper[type] = Raphael(type + '-canvas', this.cW, this.cH);
+              this.paper[type].grid = [];
               
               // Determine grid dimensions
               var t = this[dataSet].length;
@@ -142,10 +158,27 @@
               var r = Math.ceil(t / c);
               var cellW = this.cW / c;
               var cellH = this.cH / r;
-              var rectAttr = {
-                'stroke-width': 0,
-                'fill-opacity': 1
-              };
+              this.paper[type].gridCount = (c * r);
+              
+              // Create grid of rectangles
+              for (var i = 0; i < (c * r); i++) {
+                // Determine where on grid
+                var x = (i % c);
+                var y = Math.floor(i / c);
+                
+                this.paper[type].grid[x] = this.paper[type].grid[x] || [];
+                this.paper[type].grid[x][y] = this.paper[type].rect(
+                  x * cellW, y * cellH, (cellW * 0.8), (cellH * 0.8), 2);
+                this.paper[type].grid[x][y].attr(this.dRectAttr);
+              }
+            };
+            
+            BalanceApp.prototype.showCurrent = function(type) {
+              var thisApp = this;
+              
+              // Determine chamber and columns
+              var dataSet = (type == 'senate') ? 'senateData' : 'houseData';
+              var columns = this.paper[type].grid.length;
               
               // Sort by party (reverse), then display
               this[dataSet] = _.sortBy(this[dataSet], function(rep) {
@@ -153,22 +186,66 @@
               }); 
               _.each(this[dataSet], function(rep, i, origObj) {
                 // Determine where on grid
-                var x = (i % c);
-                var y = Math.floor(i / c);
-                
-                thisApp[canvasSet].objs[i] = thisApp[canvasSet].rect(
-                  x * cellW, y * cellH, (cellW * 0.8), (cellH * 0.8), 2);
-                thisApp[canvasSet].objs[i].attr(rectAttr);
+                var x = (i % columns);
+                var y = Math.floor(i / columns);
+                var attr = {};
                 if (rep.party === 'Democratic-Farmer-Labor') {
-                  thisApp[canvasSet].objs[i].attr('fill', thisApp.partyColors['D']);
+                  attr.fill = thisApp.partyColors['D'];
                 }
                 else {
-                  thisApp[canvasSet].objs[i].attr('fill', thisApp.partyColors['R']);
+                  attr.fill = thisApp.partyColors['R'];
                 }
+                attr['fill-opacity'] = 1;
+                thisApp.paper[type].grid[x][y].animate(attr, 800);
               });
+              
+              // Clear the rest
+              for (var i = this[dataSet].length; i < this.paper[type].gridCount; i ++) {
+                var x = (i % columns);
+                var y = Math.floor(i / columns);
+                this.paper[type].grid[x][y].attr(this.dRectAttr);
+              }
             };
             
-            KeyvotesApp.prototype.processHost = function() {
+            BalanceApp.prototype.showPotential = function(type) {
+              var thisApp = this;
+              
+              // Determine chamber and columns
+              var columns = this.paper[type].grid.length;
+              
+              // filter for party
+              var filteredSet = _.filter(this.pviData, function(p) { return (p.chamber == type) });
+              
+              // Sort by party (reverse), then display
+              filteredSet = _.sortBy(filteredSet, function(d) { return parseFloat(d.PVI) * -1; }); 
+              _.each(filteredSet, function(d, i, origObj) {
+                // Determine where on grid
+                var x = (i % columns);
+                var y = Math.floor(i / columns);
+                var pvi = parseFloat(d.PVI);
+                var attr = {};
+                if (pvi < -0.5) {
+                  attr.fill = thisApp.partyColors['D'];
+                }
+                else if (pvi > 0.5) {
+                  attr.fill = thisApp.partyColors['R'];
+                }
+                else {
+                  attr.fill = '#BBBBBB';
+                }
+                attr['fill-opacity'] = 0.5 + (0.5 * (Math.abs(pvi) / 25));
+                thisApp.paper[type].grid[x][y].animate(attr, 800);
+              });
+              
+              // Clear the rest
+              for (var i = filteredSet.length; i < this.paper[type].gridCount; i ++) {
+                var x = (i % columns);
+                var y = Math.floor(i / columns);
+                this.paper[type].grid[x][y].attr(this.dRectAttr);
+              }
+            };
+            
+            BalanceApp.prototype.processHost = function() {
               if (location.host.indexOf('localhost') === -1) {
                 this.dataDir = 'https://s3.amazonaws.com/data.minnpost/' +
                   'projects/minnpost-' + this.appName + '/data/';
@@ -179,18 +256,30 @@
               return this;
             };
             
-            return KeyvotesApp;
+            return BalanceApp;
           })();
           
           // Make app instance
-          keyvotesApp = new KeyvotesApp();
+          balanceApp = new BalanceApp();
+          
+          // JSONP callback for non configurable callback
+          window.pvi_callback = function(pviData) {
+            
+            balanceApp.pviData = pviData;
+            balanceApp.launch();
+          };
           
           // Get open states data
-          $.getJSON(keyvotesApp.openstatesSenateURL + '&callback=?', function(legs) {
-            keyvotesApp.senateData = legs;
-            $.getJSON(keyvotesApp.openstatesHouseURL + '&callback=?', function(legs) {
-              keyvotesApp.houseData = legs;
-              keyvotesApp.launch();
+          $.getJSON(balanceApp.openstatesSenateURL + '&callback=?', function(legs) {
+            balanceApp.senateData = legs;
+            $.getJSON(balanceApp.openstatesHouseURL + '&callback=?', function(legs) {
+              balanceApp.houseData = legs;
+              $.ajax({
+                type: 'GET',
+                dataType: 'jsonp',
+                url: balanceApp.dataDir + 'pvi.jsonp?callback=pvi_callback',
+                jsonp: 'callback'
+              });
             });
           });
           
