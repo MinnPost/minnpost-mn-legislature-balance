@@ -53,16 +53,26 @@
         color: #414141;
         margin-top: 1em;
       }
+      
+      .seat-count span {
+        font-weight: bold;
+      }
     </style>
     
     <div id="minnpost-mn-legislature-balance-application">
       <h3>Senate</h3>
       <a href="#" class="senate-current">Current</a> | <a href="#" class="senate-potential">Potential</a>
       <div id="senate-canvas"></div>
+      <div class="seat-count">
+        Republicans: <span class="senate-r-count"></span> | DFL: <span class="senate-d-count"></span>
+      </div>
       
       <h3>House</h3>
       <a href="#" class="house-current">Current</a> | <a href="#" class="house-potential">Potential</a>
       <div id="house-canvas"></div>
+      <div class="seat-count">
+        Republicans: <span class="house-r-count"></span> | DFL: <span class="house-d-count"></span>
+      </div>
       
       <p class="footnote"></p>
     </div>
@@ -235,6 +245,27 @@
                 }
                 attr['fill-opacity'] = 0.5 + (0.5 * (Math.abs(pvi) / 50));
                 thisApp.paper[type].grid[x][y].animate(attr, 800);
+                
+                // Add click event
+                (function(element, dist, oAttr) {
+                  var clicked = 0;
+                  element.click(function(e) {
+                    var attr = {};
+                    if (clicked % 3 == 0) {
+                      attr.fill = thisApp.partyColors['D'];
+                      attr['fill-opacity'] = 1;
+                    }
+                    else if (clicked % 3 == 1) {
+                      attr.fill = thisApp.partyColors['R'];
+                      attr['fill-opacity'] = 1;
+                    }
+                    else {
+                      attr = oAttr;
+                    }
+                    element.animate(attr, 400);
+                    clicked++;
+                  });
+                })(thisApp.paper[type].grid[x][y], d, attr);
               });
               
               // Clear the rest
